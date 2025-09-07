@@ -1,5 +1,6 @@
 import os
 import psycopg2
+import requests
 from flask import Flask, request, jsonify, send_from_directory
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Bot
 from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler
@@ -7,6 +8,7 @@ import telegram.constants
 import threading
 import schedule
 import time
+
 
 # --- Настройки ---
 # Получаем переменные окружения из Render
@@ -198,7 +200,8 @@ def run_flask():
     app.run(host='0.0.0.0', port=os.environ.get("PORT", 5000))
 
 def run_bot():
-    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+    # ИСПРАВЛЕНИЕ: Добавляем job_queue=True
+    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build(job_queue=True)
     application.add_handler(CommandHandler("start", lambda update, context: update.message.reply_text("Привет! Я готов к работе.")))
     application.add_handler(CallbackQueryHandler(button_callback_handler))
     
@@ -206,7 +209,7 @@ def run_bot():
     application.job_queue.run_repeating(check_and_remind, interval=14400, first=10)
     
     print("Бот запущен и готов к работе...")
-    application.run_polling()
+    application.run_polling(drop_pending_updates=True)
 
 if __name__ == '__main__':
     # Запускаем Flask и бота в разных потоках
