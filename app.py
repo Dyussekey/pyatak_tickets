@@ -7,7 +7,6 @@ import telegram.constants
 import threading
 import schedule
 import time
-import requests
 
 # --- Настройки ---
 # Получаем переменные окружения из Render
@@ -207,7 +206,7 @@ def run_bot():
     application.job_queue.run_repeating(check_and_remind, interval=14400, first=10)
     
     print("Бот запущен и готов к работе...")
-    application.run_polling(drop_pending_updates=True)
+    application.run_polling()
 
 if __name__ == '__main__':
     # Запускаем Flask и бота в разных потоках
@@ -215,4 +214,3 @@ if __name__ == '__main__':
     bot_thread = threading.Thread(target=run_bot)
     flask_thread.start()
     bot_thread.start()
-
