@@ -1,11 +1,12 @@
 import os
-import time
 import psycopg2
-import requests
 from flask import Flask, request, jsonify, send_from_directory
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Bot
 from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler
 import telegram.constants
+import threading
+import schedule
+import time
 
 # --- Настройки ---
 # Получаем переменные окружения из Render
@@ -23,6 +24,8 @@ def escape_markdown_v2(text):
     for char in special_chars:
         text = text.replace(char, f'\\{char}')
     return text
+
+# --- Обработчики Telegram ---
 
 async def check_and_remind(context: ContextTypes.DEFAULT_TYPE):
     """
@@ -54,8 +57,6 @@ async def check_and_remind(context: ContextTypes.DEFAULT_TYPE):
             print("Открытых заявок нет. Напоминание не требуется.")
     except Exception as e:
         print(f"Ошибка при отправке напоминания: {e}")
-
-# --- Обработчики Telegram ---
 
 async def button_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обрабатывает нажатия на кнопки."""
@@ -137,6 +138,7 @@ def create_request():
                     f"Описание: `{description}`\n" \
                     f"ID заявки: `{request_id}`"
         
+        # Отправляем сообщение через стандартный API Telegram с помощью requests
         requests.post(
             f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
             json={
@@ -192,10 +194,10 @@ def tips_page():
 
 # --- Точка входа ---
 
-def run_app_and_bot():
-    """Запускает Flask и бота в одном процессе."""
-    
-    # Конфигурация для Telegram-бота
+def run_flask():
+    app.run(host='0.0.0.0', port=os.environ.get("PORT", 5000))
+
+def run_bot():
     application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
     application.add_handler(CommandHandler("start", lambda update, context: update.message.reply_text("Привет! Я готов к работе.")))
     application.add_handler(CallbackQueryHandler(button_callback_handler))
@@ -203,14 +205,12 @@ def run_app_and_bot():
     # Настраиваем регулярное напоминание каждые 4 часа (14400 секунд)
     application.job_queue.run_repeating(check_and_remind, interval=14400, first=10)
     
-    # Запускаем Flask
-    from threading import Thread
-    flask_thread = Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 10000})
-    flask_thread.start()
-    
-    # Запускаем бота
     print("Бот запущен и готов к работе...")
-    application.run_polling()
+    application.run_polling(drop_pending_updates=True)
 
 if __name__ == '__main__':
-    run_app_and_bot()
+    # Запускаем Flask и бота в разных потоках
+    flask_thread = threading.Thread(target=run_flask)
+    bot_thread = threading.Thread(target=run_bot)
+    flask_thread.start()
+    bot_thread.start()
