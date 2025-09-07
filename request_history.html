@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>История заявок</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            margin: auto;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        #requestsTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        #requestsTable th, #requestsTable td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        #requestsTable th {
+            background-color: #f2f2f2;
+            color: #555;
+        }
+        #requestsTable tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .status-badge.completed {
+            background-color: #28a745;
+        }
+        .status-badge.in-progress {
+            background-color: #ffc107;
+        }
+        .status-badge.not-completed {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>История заявок</h2>
+        <table id="requestsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Клуб</th>
+                    <th>Описание</th>
+                    <th>Статус</th>
+                    <th>Дата создания</th>
+                </tr>
+            </thead>
+            <tbody id="requestsTableBody">
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', fetchRequests);
+
+        async function fetchRequests() {
+            try {
+                const response = await fetch('/requests_history');
+                const requests = await response.json();
+
+                const tableBody = document.getElementById('requestsTableBody');
+                tableBody.innerHTML = ''; // Очищаем таблицу перед заполнением
+
+                if (requests.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Заявок пока нет.</td></tr>';
+                    return;
+                }
+
+                requests.forEach(req => {
+                    const row = document.createElement('tr');
+                    
+                    const formattedDate = new Date(req.created_at).toLocaleString('ru-RU', {
+                        year: 'numeric', month: 'long', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+
+                    let statusClass = '';
+                    if (req.status === 'выполнено') {
+                        statusClass = 'completed';
+                    } else if (req.status === 'в работе') {
+                        statusClass = 'in-progress';
+                    } else {
+                        statusClass = 'not-completed';
+                    }
+
+                    row.innerHTML = `
+                        <td>${req.id}</td>
+                        <td>${req.club_name}</td>
+                        <td>${req.description}</td>
+                        <td><span class="status-badge ${statusClass}">${req.status}</span></td>
+                        <td>${formattedDate}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Ошибка при загрузке истории заявок:', error);
+                const tableBody = document.getElementById('requestsTableBody');
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Ошибка при загрузке. Попробуйте обновить страницу.</td></tr>';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор тарифа</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .main-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        select, input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        #resultMinutes, #resultTenge {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        p {
+            font-size: 16px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+
+        <div class="container">
+            <h2>Минуты в тенге</h2>
+            <p>Сколько заплатить клиенту?</p>
+            <div class="form-group">
+                <label for="clubSelect1">Клуб:</label>
+                <select id="clubSelect1">
+                    <option value="Пятак">Пятак</option>
+                    <option value="Пятак Premium">Пятак Premium</option>
+                    <option value="Пятак Level">Пятак Level</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="tariffSelect1">Тариф:</label>
+                <select id="tariffSelect1">
+                    <option value="standard">Стандартный (750 тг/час)</option>
+                    <option value="premium">Премиум (1000 тг/час)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="minutesInput1">Количество минут:</label>
+                <input type="number" id="minutesInput1" min="1" required>
+            </div>
+            <div id="resultTenge"></div>
+        </div>
+
+        <div class="container">
+            <h2>Тенге в минуты</h2>
+            <p>На сколько хватит денег?</p>
+            <div class="form-group">
+                <label for="clubSelect2">Клуб:</label>
+                <select id="clubSelect2">
+                    <option value="Пятак">Пятак</option>
+                    <option value="Пятак Premium">Пятак Premium</option>
+                    <option value="Пятак Level">Пятак Level</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="tariffSelect2">Тариф:</label>
+                <select id="tariffSelect2">
+                    <option value="standard">Стандартный (750 тг/час)</option>
+                    <option value="premium">Премиум (1000 тг/час)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="tengeInput2">Количество тенге:</label>
+                <input type="number" id="tengeInput2" min="1" required>
+            </div>
+            <div id="resultMinutes"></div>
+        </div>
+    </div>
+
+    <script>
+        // Здесь можно настроить тарифы для каждого клуба.
+        // Я добавил один пример, чтобы показать, как это работает.
+        const tariffs = {
+            'standard': { 'rate': 750 }, // 750 тг за час
+            'premium': { 'rate': 1000 } // 1000 тг за час
+        };
+
+        const minutesInput1 = document.getElementById('minutesInput1');
+        const tengeInput2 = document.getElementById('tengeInput2');
+        const tariffSelect1 = document.getElementById('tariffSelect1');
+        const tariffSelect2 = document.getElementById('tariffSelect2');
+        const resultTengeDiv = document.getElementById('resultTenge');
+        const resultMinutesDiv = document.getElementById('resultMinutes');
+
+        // Функция для расчета "Минуты в тенге"
+        function calculateTenge() {
+            const minutes = parseFloat(minutesInput1.value);
+            const tariffRate = tariffs[tariffSelect1.value].rate;
+            
+            if (minutes > 0) {
+                const totalTenge = (minutes / 60) * tariffRate;
+                resultTengeDiv.textContent = `Итого: ${totalTenge.toFixed(2)} тг`;
+            } else {
+                resultTengeDiv.textContent = '';
+            }
+        }
+
+        // Функция для расчета "Тенге в минуты"
+        function calculateMinutes() {
+            const tenge = parseFloat(tengeInput2.value);
+            const tariffRate = tariffs[tariffSelect2.value].rate;
+
+            if (tenge > 0) {
+                const totalMinutes = (tenge / tariffRate) * 60;
+                resultMinutesDiv.textContent = `Итого: ${totalMinutes.toFixed(0)} мин`;
+            } else {
+                resultMinutesDiv.textContent = '';
+            }
+        }
+
+        // Слушаем изменения в полях ввода и селекторах
+        minutesInput1.addEventListener('input', calculateTenge);
+        tariffSelect1.addEventListener('change', calculateTenge);
+
+        tengeInput2.addEventListener('input', calculateMinutes);
+        tariffSelect2.addEventListener('change', calculateMinutes);
+    </script>
+</body>
+</html>
