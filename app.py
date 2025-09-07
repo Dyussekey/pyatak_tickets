@@ -8,12 +8,10 @@ import telebot # <-- ПЕРЕМЕСТИ ЭТУ СТРОКУ СЮДА
 app = Flask(__name__)
 
 # --- Настройки ---
-# Вставь сюда Connection String из Neon
-DB_CONNECTION_STRING = "postgresql://neondb_owner:npg_Cp3nJgZU9ufr@ep-red-waterfall-addsdfyk-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-# Вставь сюда токен своего Telegram-бота
-TELEGRAM_BOT_TOKEN = "8277096952:AAHypda1H8aIWa6EMZ_pbADzN5CvmU3f8mI"
-# Вставь сюда свой ID чата в Telegram
-TELEGRAM_CHAT_ID = "987765617"
+# Получаем переменные окружения из Render
+DB_CONNECTION_STRING = os.environ.get("DATABASE_URL")
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
 # --- Маршруты сервера ---
 
@@ -128,4 +126,5 @@ def tips_page():
     return send_from_directory('.', 'tips.html')
 
 if __name__ == '__main__':
+
     app.run(debug=True)
