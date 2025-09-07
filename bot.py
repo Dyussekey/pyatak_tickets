@@ -142,18 +142,17 @@ def main():
     """
     Основная функция, которая запускает бота.
     """
+    # Создаём приложение бота
     application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
     
-    # Добавляем обработчик для команды /done
+    # Создаём обработчик для команды /done
     application.add_handler(CommandHandler("done", set_status_done))
-    
-    # Добавляем обработчик для нажатий на кнопки
-    application.add_handler(CallbackQueryHandler(button_callback_handler))
 
     # Запускаем бота
     print("Бот запущен и готов к работе...")
     application.run_polling()
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     main()
+
