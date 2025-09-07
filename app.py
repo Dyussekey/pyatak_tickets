@@ -7,6 +7,7 @@ import telegram.constants
 import threading
 import schedule
 import time
+import requests
 
 # --- Настройки ---
 # Получаем переменные окружения из Render
@@ -214,3 +215,4 @@ if __name__ == '__main__':
     bot_thread = threading.Thread(target=run_bot)
     flask_thread.start()
     bot_thread.start()
+
